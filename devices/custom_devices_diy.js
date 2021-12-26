@@ -344,7 +344,7 @@ module.exports = [
     {
         zigbeeModel: ['zbest.hvac01'],
         model: 'ZBEST_HV_01',
-        vendor: 'zBest',
+        vendor: 'Custom devices (DiY)',
         description: 'Thermostat',
         fromZigbee: [fz.zbest_thermostat_att_report],
         toZigbee: [
