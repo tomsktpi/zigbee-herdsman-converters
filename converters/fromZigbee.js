@@ -4501,6 +4501,35 @@ const converters = {
             };
         },
     },
+    zbest_thermostat_att_report: {
+        cluster: 'hvacThermostat',
+        type: ['attributeReport', 'readResponse'],
+        convert: (model, msg, publish, options, meta) => {
+            const result = {};
+            if (typeof msg.data['localTemp'] == 'number') {
+                result[postfixWithEndpointName('local_temperature', msg, model)] = precisionRound(msg.data['localTemp'], 2) / 100;
+            }
+            if (typeof msg.data['occupiedHeatingSetpoint'] == 'number') {
+                let ohs = precisionRound(msg.data['occupiedHeatingSetpoint'], 2) / 100;
+                // Stelpro will return -325.65 when set to off
+                ohs = ohs < - 250 ? 0 : ohs;
+                result[postfixWithEndpointName('occupied_heating_setpoint', msg, model)] = ohs;
+            }
+            const smode = msg.data['systemMode'];
+            if (typeof smode == 'number') {
+                result[postfixWithEndpointName('system_mode', msg, model)] = smode;
+            }
+            const state = msg.data['runningState'];
+            if (typeof state == 'number') {
+                result[postfixWithEndpointName('running_state', msg, model)] = state;
+            }
+			if (typeof msg.data['acCapacity'] == 'number') {
+                result[postfixWithEndpointName('ac_capacity', msg, model)] = msg.data['acCapacity'];
+            }
+            return result;
+
+        },
+    },
     _8840100H_water_leak_alarm: {
         cluster: 'haApplianceEventsAlerts',
         type: 'commandAlertsNotification',
