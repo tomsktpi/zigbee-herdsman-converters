@@ -332,4 +332,40 @@ module.exports = [
         },
         exposes: [e.soil_moisture(), e.battery(), e.illuminance(), e.temperature(), e.humidity()],
     },
+    {
+        zigbeeModel: ['zBest.IR1'],
+        model: 'ZBEST_IR_01',
+        vendor: 'Custom devices (DiY)',
+        description: '[IR transmitter]',
+        fromZigbee: [fz.brightness, fz.on_off],
+        toZigbee: [tz.ir_command],
+	exposes: [e.switch()],
+    },
+    {
+        zigbeeModel: ['zbest.hvac01'],
+        model: 'ZBEST_HV_01',
+        vendor: 'zBest',
+        description: 'Thermostat',
+        fromZigbee: [fz.zbest_thermostat_att_report],
+        toZigbee: [
+            tz.thermostat_local_temperature,
+            tz.thermostat_occupied_heating_setpoint,
+            tz.thermostat_system_mode,
+            tz.thermostat_ac_capacity,
+        ],
+        exposes: [
+            exposes.climate().withSetpoint('current_heating_setpoint', 5, 30, 0.5).withLocalTemperature()
+                .withSystemMode(['off', 'auto', 'heat']).withRunningState(['idle', 'heat']),
+        ],
+        meta: {configureKey: 1},
+        configure: async (device, coordinatorEndpoint) => {
+            const endpoint = device.getEndpoint(8);
+            await bind(endpoint, coordinatorEndpoint, ['hvacThermostat']);
+            await configureReporting.thermostatTemperature(endpoint);
+            await configureReporting.thermostatSystemMode(endpoint);
+            await configureReporting.thermostatOccupiedHeatingSetpoint(endpoint);
+            await configureReporting.thermostatAcCapacity(endpoint);
+        await configureReporting.thermostatRunningState(endpoint);
+        },
+    },
 ];

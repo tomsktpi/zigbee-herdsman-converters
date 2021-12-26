@@ -54,6 +54,25 @@ const converters = {
             meta.logger.info(`Wrote '${JSON.stringify(value.payload)}' to '${value.cluster}'`);
         },
     },
+
+    ir_command: {
+        key: ['command'],
+        convertSet: async (entity, key, value, meta) => {
+            const options = {disableDefaultResponse: false};
+            await entity.command(
+                    'genLevelCtrl',
+                    'step',
+                    {stepmode: Number(value.protocol), stepsize: Number(value.cmd), transtime: Number(value.address)},
+                    options,
+                );
+            return {state: {command: 0}, readAfterWriteTime : 0};
+        },
+        convertGet: async (entity, key, meta) => {
+            return {state: {command: 0}};
+        },
+
+    },
+
     factory_reset: {
         key: ['reset'],
         convertSet: async (entity, key, value, meta) => {
@@ -1275,6 +1294,16 @@ const converters = {
         },
         convertGet: async (entity, key, meta) => {
             await entity.read('hvacThermostat', ['occupiedHeatingSetpoint']);
+        },
+    },
+    thermostat_ac_capacity: {
+        key: ['ac_capacity'],
+        convertSet: async (entity, key, value, meta) => {
+            const acCapacity = value;
+            await entity.write('hvacThermostat', {acCapacity});
+        },
+        convertGet: async (entity, key, meta) => {
+            await entity.read('hvacThermostat', ['acCapacity']);
         },
     },
     thermostat_unoccupied_heating_setpoint: {
