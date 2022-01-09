@@ -9,13 +9,18 @@ const tuya = require('../lib/tuya');
 const fzLocal = {
     ZMRM02: {
         cluster: 'manuSpecificTuya',
-        type: ['commandGetData', 'commandSetDataResponse'],
+        type: ['commandGetData', 'commandSetDataResponse', 'commandDataResponse'],
         convert: (model, msg, publish, options, meta) => {
-            const button = msg.data.dp;
-            const actionValue = tuya.getDataValue(msg.data.datatype, msg.data.data);
-            const lookup = {0: 'single', 1: 'double', 2: 'hold'};
-            const action = lookup[actionValue];
-            return {action: `button_${button}_${action}`};
+            const dpValue = tuya.firstDpValue(msg, meta, 'ZMRM02');
+            if (dpValue.dp === 10) {
+                return {battery: tuya.getDataValue(dpValue)};
+            } else {
+                const button = dpValue.dp;
+                const actionValue = tuya.getDataValue(dpValue);
+                const lookup = {0: 'single', 1: 'double', 2: 'hold'};
+                const action = lookup[actionValue];
+                return {action: `button_${button}_${action}`};
+            }
         },
     },
 };

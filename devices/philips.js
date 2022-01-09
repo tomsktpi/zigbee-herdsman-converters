@@ -30,6 +30,33 @@ const hueExtend = {
 
 module.exports = [
     {
+        zigbeeModel: ['929003047501'],
+        model: '929003047501',
+        vendor: 'Philips',
+        description: 'Centura recessed spotlight',
+        meta: {turnsOffAtBrightness1: true},
+        extend: hueExtend.light_onoff_brightness_colortemp_color({colorTempRange: [153, 500]}),
+        ota: ota.zigbeeOTA,
+    },
+    {
+        zigbeeModel: ['915005996401'],
+        model: '915005996401',
+        vendor: 'Philips',
+        description: 'Hue white ambiance ceiling light Enrave S with Bluetooth',
+        meta: {turnsOffAtBrightness1: true},
+        extend: hueExtend.light_onoff_brightness_colortemp({colorTempRange: [153, 454]}),
+        ota: ota.zigbeeOTA,
+    },
+    {
+        zigbeeModel: ['929003054001'],
+        model: '929003054001',
+        vendor: 'Philips',
+        description: 'Hue Wellness table lamp',
+        meta: {turnsOffAtBrightness1: true},
+        extend: extend.light_onoff_brightness_colortemp({colorTempRange: [153, 454]}),
+        ota: ota.zigbeeOTA,
+    },
+    {
         zigbeeModel: ['4076131P6'],
         model: '4076131P6',
         vendor: 'Philips',
@@ -1914,6 +1941,39 @@ module.exports = [
         ota: ota.zigbeeOTA,
     },
     {
+        zigbeeModel: ['SML004'],
+        model: '9290030674',
+        vendor: 'Philips',
+        description: 'Hue motion outdoor sensor',
+        fromZigbee: [fz.battery, fz.occupancy, fz.temperature, fz.illuminance, fz.occupancy_timeout,
+            fz.hue_motion_sensitivity, fz.hue_motion_led_indication],
+        exposes: [e.temperature(), e.occupancy(), e.battery(), e.illuminance_lux(), e.illuminance(),
+            exposes.enum('motion_sensitivity', ea.ALL, ['low', 'medium', 'high']),
+            exposes.binary('led_indication', ea.ALL, true, false).withDescription('Blink green LED on motion detection'),
+            exposes.numeric('occupancy_timeout', ea.ALL).withUnit('second').withValueMin(0).withValueMax(65535)],
+        toZigbee: [tz.occupancy_timeout, tz.hue_motion_sensitivity, tz.hue_motion_led_indication],
+        endpoint: (device) => {
+            return {
+                'default': 2, // default
+                'ep1': 1,
+                'ep2': 2, // e.g. for write to msOccupancySensing
+            };
+        },
+        configure: async (device, coordinatorEndpoint, logger) => {
+            const endpoint = device.getEndpoint(2);
+            const binds = ['genPowerCfg', 'msIlluminanceMeasurement', 'msTemperatureMeasurement', 'msOccupancySensing'];
+            await reporting.bind(endpoint, coordinatorEndpoint, binds);
+            await reporting.batteryPercentageRemaining(endpoint);
+            await reporting.occupancy(endpoint);
+            await reporting.temperature(endpoint);
+            await reporting.illuminance(endpoint);
+            // read occupancy_timeout and motion_sensitivity
+            await endpoint.read('msOccupancySensing', ['pirOToUDelay']);
+            await endpoint.read('msOccupancySensing', [48], {manufacturerCode: 4107});
+        },
+        ota: ota.zigbeeOTA,
+    },
+    {
         zigbeeModel: ['LOM001'],
         model: '929002240401',
         vendor: 'Philips',
@@ -2273,7 +2333,7 @@ module.exports = [
         ota: ota.zigbeeOTA,
     },
     {
-        zigbeeModel: ['5309331P6'],
+        zigbeeModel: ['5309331P6', '5309330P6'],
         model: '5309331P6',
         vendor: 'Philips',
         description: 'Hue White ambiance Runner triple spotlight',
@@ -2282,7 +2342,7 @@ module.exports = [
         ota: ota.zigbeeOTA,
     },
     {
-        zigbeeModel: ['5309230P6'],
+        zigbeeModel: ['5309230P6', '5309231P6'],
         model: '5309230P6',
         vendor: 'Philips',
         description: 'Hue White ambiance Runner double spotlight',
@@ -2327,7 +2387,7 @@ module.exports = [
         ota: ota.zigbeeOTA,
     },
     {
-        zigbeeModel: ['5309030P9'],
+        zigbeeModel: ['5309030P9', '5309031P9', '5309030P6', '5309031P6'],
         model: '5309030P9',
         vendor: 'Philips',
         description: 'Hue White ambiance Runner single spotlight',
@@ -2511,6 +2571,15 @@ module.exports = [
         model: '8719514302235',
         vendor: 'Philips',
         description: 'Hue White Filament Bulb E14',
+        extend: hueExtend.light_onoff_brightness(),
+        ota: ota.zigbeeOTA,
+    },
+    {
+        zigbeeModel: ['LWA019'],
+        model: '9290024691',
+        vendor: 'Philips',
+        description: 'Hue white single filament bulb A19 E26 with Bluetooth (1100 Lumen)',
+        meta: {turnsOffAtBrightness1: true},
         extend: hueExtend.light_onoff_brightness(),
         ota: ota.zigbeeOTA,
     },

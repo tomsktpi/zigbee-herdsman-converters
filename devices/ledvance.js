@@ -1,7 +1,15 @@
 const ota = require('../lib/ota');
 const extend = require('../lib/extend');
+const reporting = require('../lib/reporting');
 
 module.exports = [
+    {
+        zigbeeModel: ['A60S TW'],
+        model: 'AC33898',
+        vendor: 'LEDVANCE',
+        description: ' Smart+ LED classic E27 Zigbee 10W/810lm',
+        extend: extend.light_onoff_brightness_colortemp({colorTempRange: [153, 370]}),
+    },
     {
         zigbeeModel: ['Outdoor Plug', 'Plug Value'],
         model: 'AC26940/AC31266',
@@ -9,6 +17,11 @@ module.exports = [
         description: 'Smart Zigbee outdoor plug',
         extend: extend.switch(),
         ota: ota.ledvance,
+        configure: async (device, coordinatorEndpoint, logger) => {
+            const endpoint = device.getEndpoint(1);
+            await reporting.bind(endpoint, coordinatorEndpoint, ['genOnOff']);
+            await reporting.onOff(endpoint);
+        },
     },
     {
         zigbeeModel: ['Panel TW Z3'],
